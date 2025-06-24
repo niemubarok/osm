@@ -1,0 +1,9 @@
+<template>
+  <q-img
+        fit="fit"
+        src="~assets/logo/sig.svg"
+        spinner-color="primary"
+        spinner-size="82px"
+        width="10%"
+      />
+</template>

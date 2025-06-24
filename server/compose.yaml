@@ -1,0 +1,16 @@
+name: osm-backend
+
+services:
+  osm-be-app:
+    build:
+      context: .
+    container_name: osm-be-app
+    environment:
+      NODE_ENV: production
+    ports:
+      - 7003:7003
+    volumes:
+      - ./.nginx/certs:/etc/nginx/certs
+      - ./.nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./.nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./public:/app/public

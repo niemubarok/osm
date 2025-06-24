@@ -1,0 +1,13 @@
+name: osm-frontend
+
+services:
+  osm-fe-app:
+    build:
+      context: .
+    container_name: osm-fe-app
+    ports:
+      - "7004:443"
+    volumes:
+      - ./.nginx/certs:/etc/nginx/certs
+      - ./.nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./.nginx/nginx.conf:/etc/nginx/nginx.conf
