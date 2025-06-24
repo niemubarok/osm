@@ -14,7 +14,7 @@ const corsConfig = defineConfig({
     'http://localhost:9200',
     'http://localhost:4000',
     'http://127.0.0.1:4000',
-    'https://osm-production.up.railway.app'
+    'https://sot-finding.vercel.app',
   ],
   methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   headers: true,
