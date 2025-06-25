@@ -3,14 +3,17 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: process.env.API_URL,
-  withCredentials: true // Enable cookies for session auth
+  // Remove withCredentials since we're using JWT tokens
 })
 
-// Add a request interceptor (untuk session auth, tidak perlu Authorization header)
+// Add a request interceptor to include JWT token
 api.interceptors.request.use(
   (config) => {
-    // Session auth menggunakan cookies automatically
-    // Tidak perlu manual Authorization header
+    // Get JWT token from localStorage
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -25,7 +28,10 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Redirect to login on unauthorized
+      // Clear token and redirect to login on unauthorized
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('roles')
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }

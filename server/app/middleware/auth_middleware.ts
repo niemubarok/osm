@@ -11,14 +11,14 @@ export default class AuthMiddleware {
    */
   redirectTo = '/api/auth/login'
 
-  async handle(ctx: HttpContext, next: NextFn, options?: { guards?: ("web")[] }) {
+  async handle(ctx: HttpContext, next: NextFn, options?: { guards?: ("web" | "api")[] }) {
     if (ctx.request.method() === 'OPTIONS') {
       return ctx.response.status(200).send('')
     }
 
     try {
-      // Use session guard by default or specified guards
-      const guards = options?.guards || ['web']
+      // Use api guard by default or specified guards  
+      const guards = options?.guards || ['api']
       await ctx.auth.authenticateUsing(guards)
       return next()
     } catch (error) {

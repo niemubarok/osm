@@ -44,12 +44,15 @@ export const useUserStore = defineStore('users', {
         console.log('🚀 ~ login ~ res?.data:', res?.data)
         console.log('Full login response:', res)
         
-        if (!res?.data) {
-          console.error('Login response does not contain data')
+        if (!res?.data || !res?.data.token) {
+          console.error('Login response does not contain token')
           return false
         } 
         
-        // Tidak perlu token lagi karena menggunakan session auth
+        // Store JWT token
+        ls.set('auth_token', res.data.token)
+        
+        // Store user data
         this.user = res.data.user
         ls.set('user', this.user)
 
@@ -58,6 +61,7 @@ export const useUserStore = defineStore('users', {
         ls.set('roles', this.roles)
         
         console.log('✅ Login successful, user stored:', this.user)
+        console.log('✅ Token stored:', res.data.token)
         return true 
       } catch (error) {
         console.error('❌ Login error:', error)
@@ -103,6 +107,7 @@ export const useUserStore = defineStore('users', {
         await api.post('/auth/logout')
         this.user = {}
         this.roles = [0]
+        ls.remove('auth_token')
         ls.remove('user')
         ls.remove('roles')
         Notify.create({
@@ -115,26 +120,46 @@ export const useUserStore = defineStore('users', {
         // Clear local data even if server logout fails
         this.user = {}
         this.roles = [0]
+        ls.remove('auth_token')
         ls.remove('user')
         ls.remove('roles')
         return true
       }
     },
+    },
 
     async checkAuth () {
       try {
+        console.log('🔄 Checking authentication status...')
+        
+        // Check if token exists
+        const token = ls.get('auth_token')
+        if (!token) {
+          console.log('❌ No auth token found')
+          return false
+        }
+        
         const res = await api.get('/auth/me')
+        console.log('🚀 checkAuth response:', res)
+        
         if (res.data?.user) {
           this.user = res.data.user
           ls.set('user', this.user)
           this.roles = [1] // Default role
           ls.set('roles', this.roles)
+          console.log('✅ Auth check successful, user:', this.user)
           return true
         }
+        console.log('❌ Auth check failed: no user data')
         return false
       } catch (error) {
+        console.error('❌ Auth check error:', error)
+        console.error('Error response:', error.response)
+        
+        // Clear invalid token
         this.user = {}
         this.roles = [0]
+        ls.remove('auth_token')
         ls.remove('user')
         ls.remove('roles')
         return false
@@ -269,5 +294,5 @@ export const useUserStore = defineStore('users', {
         return null
       }
     }
-  }
+  
 })

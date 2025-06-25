@@ -20,6 +20,7 @@ router.get('/', async () => {
 router
   .group(() => {
     router.post('/login', '#controllers/auth_controller.login')
+    router.post('/test-login', '#controllers/auth_controller.testLogin')
     router.post('/register', '#controllers/auth_controller.register') // For admin use
   })
   .prefix('api/auth')

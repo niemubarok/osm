@@ -42,7 +42,7 @@
     "@japa/runner": "^3.1.4",
     "@swc/core": "^1.7.6",
     "@types/crypto-js": "^4.2.2",
-    "@types/jsonwebtoken": "^9.0.7",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/ldapjs": "^3.0.6",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.1.0",
@@ -55,10 +55,10 @@
     "typescript": "~5.5"
   },
   "dependencies": {
-    "@adonisjs/auth": "^9.2.3",
+    "@adonisjs/auth": "^9.4.0",
     "@adonisjs/core": "^6.12.1",
     "@adonisjs/cors": "^2.2.1",
-    "@adonisjs/lucid": "^21.1.1",
+    "@adonisjs/lucid": "^21.6.1",
     "@adonisjs/session": "^7.4.2",
     "@vinejs/vine": "^2.1.0",
     "crypto-js": "^4.2.0",
