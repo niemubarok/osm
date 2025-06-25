@@ -117,7 +117,7 @@ const routes = [
           permission: 'read'
 
         },
-        component: () => import('src/pages/ParticipantsTablePage.vue')
+        component: () => import('src/pages/participantsTablePage.vue')
       },
       {
         path: '/attendances',
