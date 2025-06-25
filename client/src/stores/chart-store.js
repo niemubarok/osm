@@ -57,24 +57,29 @@ export const useChartStore = defineStore('Chart', {
       ]
       
       // Findings per location
-      const findingsPerLocation = locationData.map(location => {
-        // Get SOTs for this location
-        const locationFindings = sotParticipantFindingsData.filter(finding => {
-          // Find the SOT that contains this finding (simplified for demo)
-          return finding.Id % locationData.length === (location.Id - 1)
+      // Distribute findings across locations based on SOT data
+      const findingsPerLocation = locationData.map((location, index) => {
+        // Create a more realistic distribution of findings per location
+        const locationFindings = sotParticipantFindingsData.filter((finding, findingIndex) => {
+          // Distribute findings more evenly: every nth finding goes to location n
+          return findingIndex % locationData.length === index
         })
         
         const safeCount = locationFindings.filter(f => f.IsSafe).length
         const unsafeCount = locationFindings.filter(f => !f.IsSafe).length
         
+        console.log(`🗺️ Location "${location.Name}": findings=${locationFindings.length}, safe=${safeCount}, unsafe=${unsafeCount}`)
+        
         return {
+          Name: location.Name, // Match component expectation
+          NumberOfFindings: safeCount + unsafeCount, // Match component expectation
           location: location.Name,
           safe: safeCount,
           unsafe: unsafeCount,
           total: safeCount + unsafeCount
         }
-      }).filter(item => item.total > 0) // Only include locations with findings
-      
+      })
+
       this.numberOfFindingsPerLocation = findingsPerLocation
       
       // Observation type per location (detailed breakdown)
@@ -94,14 +99,18 @@ export const useChartStore = defineStore('Chart', {
         const safeCount = observerFindings.filter(f => f.IsSafe).length
         const unsafeCount = observerFindings.filter(f => !f.IsSafe).length
         
+        console.log(`👥 Observer "${participant?.FullName || observerId}": findings=${observerFindings.length}, safe=${safeCount}, unsafe=${unsafeCount}`)
+        
         return {
+          ObserverName: participant?.FullName || `Observer ${observerId}`, // Match component expectation
+          NumberOfFindings: safeCount + unsafeCount, // Match component expectation
           observer: participant?.FullName || `Observer ${observerId}`,
           safe: safeCount,
           unsafe: unsafeCount,
           total: safeCount + unsafeCount
         }
       }).filter(item => item.total > 0)
-      
+
       this.numberOfFindingsPerObserver = findingsPerObserver
       
       // Findings per CLSR category
@@ -111,21 +120,29 @@ export const useChartStore = defineStore('Chart', {
         const safeCount = clsrFindings.filter(f => f.IsSafe).length
         const unsafeCount = clsrFindings.filter(f => !f.IsSafe).length
         
+        console.log(`📋 CLSR "${clsr.Name}": findings=${clsrFindings.length}, safe=${safeCount}, unsafe=${unsafeCount}`)
+        
         return {
+          Name: clsr.Name, // Match component expectation
+          NumberOfFindings: safeCount + unsafeCount, // Match component expectation
           category: clsr.Name,
           safe: safeCount,
           unsafe: unsafeCount,
           total: safeCount + unsafeCount
         }
       }).filter(item => item.total > 0)
-      
+
       this.numberOfFindingsPerClsr = findingsPerClsr
       
       console.log('📊 Chart data calculated (Demo Mode):', {
         totalFindings: this.totalFindings,
         totalSafe: this.totalSafe,
         totalUnsafe: this.totalUnsafe,
-        totalObservers: this.totalObservers
+        totalObservers: this.totalObservers,
+        observationType: this.observationType,
+        numberOfFindingsPerLocation: this.numberOfFindingsPerLocation,
+        numberOfFindingsPerObserver: this.numberOfFindingsPerObserver,
+        numberOfFindingsPerClsr: this.numberOfFindingsPerClsr
       })
     }
   }

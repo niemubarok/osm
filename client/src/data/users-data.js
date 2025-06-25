@@ -3,7 +3,7 @@ export const userData = [
   {
     id: 1,
     full_name: 'Super Administrator',
-    email: 'admin@sbi.co.id',
+    email: 'admin@mail.id',
     password: 'password123',
     created_at: new Date(),
     updated_at: new Date()
@@ -11,7 +11,7 @@ export const userData = [
   {
     id: 2,
     full_name: 'Safety Manager',
-    email: 'safety.manager@sbi.co.id',
+    email: 'safety.manager@mail.id',
     password: 'password123',
     created_at: new Date(),
     updated_at: new Date()
@@ -19,7 +19,7 @@ export const userData = [
   {
     id: 3,
     full_name: 'HSE Coordinator',
-    email: 'hse.coordinator@sbi.co.id',
+    email: 'hse.coordinator@mail.id',
     password: 'password123',
     created_at: new Date(),
     updated_at: new Date()
@@ -27,7 +27,7 @@ export const userData = [
   {
     id: 4,
     full_name: 'Plant Manager',
-    email: 'plant.manager@sbi.co.id',
+    email: 'plant.manager@mail.id',
     password: 'password123',
     created_at: new Date(),
     updated_at: new Date()
@@ -35,7 +35,7 @@ export const userData = [
   {
     id: 5,
     full_name: 'Operations Supervisor',
-    email: 'ops.supervisor@sbi.co.id',
+    email: 'ops.supervisor@mail.id',
     password: 'password123',
     created_at: new Date(),
     updated_at: new Date()

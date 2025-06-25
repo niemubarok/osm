@@ -148,27 +148,27 @@ const isLoginPage = computed(() => {
 
 const demoUsers = [
   {
-    email: 'admin@sbi.co.id',
+    email: 'admin@mail.id',
     password: 'password123',
     role: 'Super Administrator'
   },
   {
-    email: 'safety.manager@sbi.co.id',
+    email: 'safety.manager@mail.id',
     password: 'password123',
     role: 'Safety Manager'
   },
   {
-    email: 'hse.coordinator@sbi.co.id',
+    email: 'hse.coordinator@mail.id',
     password: 'password123',
     role: 'HSE Coordinator'
   },
   {
-    email: 'plant.manager@sbi.co.id',
+    email: 'plant.manager@mail.id',
     password: 'password123',
     role: 'Plant Manager'
   },
   {
-    email: 'ops.supervisor@sbi.co.id',
+    email: 'ops.supervisor@mail.id',
     password: 'password123',
     role: 'Operations Supervisor'
   }

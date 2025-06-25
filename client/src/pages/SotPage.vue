@@ -128,12 +128,11 @@ const cardInfo = [
   }
 ]
 
-const charts = [
+const charts = computed(() => [
   {
     title: 'Observation Type',
     component: ObservationTypeChartComponent,
     data: chartStore.observationType
-
   },
   {
     title: 'Number of Findings by Location',
@@ -148,16 +147,23 @@ const charts = [
   {
     title: 'Number of Findings by Observer',
     component: NumberOfFindingsPerObserverChartComponent,
-    data: chartStore.numberOfFindingsPerObserver.map
+    data: chartStore.numberOfFindingsPerObserver
   }
-
-]
+])
 onMounted(async () => {
   await chartStore.getChartData()
   cardInfo[0].value.value = chartStore.totalObservers
   cardInfo[1].value.value = chartStore.totalFindings
   cardInfo[2].value.value = chartStore.totalSafe
   cardInfo[3].value.value = chartStore.totalUnsafe
+  
+  // Debug logs untuk memastikan data chart tersedia
+  console.log('📊 Chart data loaded in SotPage:', {
+    observationType: chartStore.observationType,
+    numberOfFindingsPerLocation: chartStore.numberOfFindingsPerLocation,
+    numberOfFindingsPerObserver: chartStore.numberOfFindingsPerObserver,
+    numberOfFindingsPerClsr: chartStore.numberOfFindingsPerClsr
+  })
 })
 
 let intervalId
@@ -168,6 +174,13 @@ const refreshData = async () => {
   cardInfo[1].value.value = chartStore.totalFindings
   cardInfo[2].value.value = chartStore.totalSafe
   cardInfo[3].value.value = chartStore.totalUnsafe
+  
+  console.log('🔄 Data refreshed:', {
+    totalObservers: chartStore.totalObservers,
+    totalFindings: chartStore.totalFindings,
+    totalSafe: chartStore.totalSafe,
+    totalUnsafe: chartStore.totalUnsafe
+  })
 }
 
 tryOnMounted(() => {
