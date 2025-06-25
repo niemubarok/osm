@@ -5,6 +5,8 @@
   <q-layout view="lHh Lpr lFf">
 
     <q-header v-if="$route.meta.showHeader && componentStore.showHeader" class=" noprint bg-grey-2 shadow-1">
+      <!-- Demo Banner -->
+      <DemoBanner />
 
       <q-toolbar>
         <q-btn class="noprint " flat icon="menu" color="dark" aria-label="Menu"
@@ -144,6 +146,7 @@
 
 <script setup>
 import EssentialLink from 'components/EssentialLink.vue'
+import DemoBanner from 'components/DemoBanner.vue'
 import { useComponentStore } from 'src/stores/component-store'
 import { useUserStore } from 'src/stores/user-store'
 import LogoSBI from 'src/components/LogoSBI.vue'

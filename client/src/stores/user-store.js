@@ -3,6 +3,7 @@ import { Cookies, Notify } from 'quasar'
 import { api } from 'src/boot/axios.js'
 import ls from 'localstorage-slim'
 import { ref } from 'vue'
+import { userData, participantData } from 'src/data'
 
 export const useUserStore = defineStore('users', {
   state: () => ({
@@ -30,83 +31,75 @@ export const useUserStore = defineStore('users', {
   },
 
   actions: {
+    // DEMO MODE - Using dummy data instead of API calls
     async login () {
       try {
-        console.log('🔄 Starting login process...')
+        console.log('🔄 Starting demo login process...')
         console.log('Username:', this.username)
         console.log('Password length:', this.password?.length)
         
-        const res = await api.post('/auth/login', {
-          email: this.username, // Menggunakan email sebagai username
-          password: this.password
-        })
-
-        console.log('🚀 ~ login ~ res?.data:', res?.data)
-        console.log('Full login response:', res)
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000))
         
-        if (!res?.data) {
-          console.error('Login response does not contain data')
-          return false
-        } 
+        // Find user in dummy data
+        const user = userData.find(u => 
+          u.email === this.username && u.password === this.password
+        )
         
-        // Tidak perlu token lagi karena menggunakan session auth
-        this.user = res.data.user
-        ls.set('user', this.user)
-
-        // Set default role untuk database auth (bisa disesuaikan nanti)
-        this.roles = [1] // Default admin role, nanti bisa ditambah role system
-        ls.set('roles', this.roles)
-        
-        console.log('✅ Login successful, user stored:', this.user)
-        return true 
-      } catch (error) {
-        console.error('❌ Login error:', error)
-        
-        if (error.code === 'ERR_NETWORK') {
-          const message = 'Failed to connect to the server'
-          Notify.create({
-            message,
-            type: 'negative'
-          })
-          throw new Error(message)
-        }
-        
-        if (error.response?.status === 401) {
+        if (!user) {
           const message = 'Please Check Your Email or Password'
           Notify.create({
             message,
             type: 'negative'
           })
           throw new Error(message)
-        } 
-        
-        if (error.response?.data?.message) {
-          Notify.create({
-            message: error.response.data.message,
-            type: 'negative'
-          })
-          throw new Error(error.response.data.message)
         }
         
-        // Generic error
-        const message = 'Login failed. Please try again.'
+        // Find corresponding participant data
+        const participant = participantData.find(p => 
+          p.Email === user.email
+        )
+        
+        // Create user object with participant info
+        this.user = {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          participant: participant || null
+        }
+        
+        ls.set('user', this.user)
+        
+        // Set default role for demo
+        this.roles = [1] // Admin role for demo
+        ls.set('roles', this.roles)
+        
+        console.log('✅ Demo login successful, user stored:', this.user)
+        
         Notify.create({
-          message,
-          type: 'negative'
+          message: 'Login successful! (Demo Mode)',
+          type: 'positive'
         })
-        throw new Error(message)
+        
+        return true 
+      } catch (error) {
+        console.error('❌ Demo login error:', error)
+        throw error
       }
     },
 
     async logout () {
       try {
-        await api.post('/auth/logout')
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
         this.user = {}
         this.roles = [0]
         ls.remove('user')
         ls.remove('roles')
+        
         Notify.create({
-          message: 'Successfully logged out',
+          message: 'Successfully logged out (Demo Mode)',
           type: 'positive'
         })
         return true
@@ -123,14 +116,16 @@ export const useUserStore = defineStore('users', {
 
     async checkAuth () {
       try {
-        const res = await api.get('/auth/me')
-        if (res.data?.user) {
-          this.user = res.data.user
-          ls.set('user', this.user)
-          this.roles = [1] // Default role
-          ls.set('roles', this.roles)
+        // Check if user exists in localStorage
+        const storedUser = ls.get('user')
+        const storedRoles = ls.get('roles')
+        
+        if (storedUser && storedRoles) {
+          this.user = storedUser
+          this.roles = storedRoles
           return true
         }
+        
         return false
       } catch (error) {
         this.user = {}
@@ -140,44 +135,50 @@ export const useUserStore = defineStore('users', {
         return false
       }
     },
+
     hasAccess (component) {
       return this.roles.some((role) =>
         this.permissions[component].includes(role)
       )
     },
+
     async addUser (data) {
-      const res = await api.post('/user/add', {
-        data: {
-          roles: data.roles,
-          UserName: data.username,
-          Password: data.password
-        }
-      })
-      if (res.status === 200) {
-        Notify.create({
-          message: 'User added successfully',
-          type: 'positive',
-          position: 'top',
-          timeout: 2000,
-          classes: ['bg-positive text-black']
-        })
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const newUser = {
+        id: Math.max(...userData.map(u => u.id)) + 1,
+        full_name: data.username,
+        email: data.username + '@demo.com',
+        password: data.password,
+        created_at: new Date(),
+        updated_at: new Date()
       }
-      return res
+      
+      userData.push(newUser)
+      
+      Notify.create({
+        message: 'User added successfully (Demo Mode)',
+        type: 'positive',
+        position: 'top',
+        timeout: 2000,
+        classes: ['bg-positive text-black']
+      })
+      
+      return { status: 200, data: newUser }
     },
+
     async getUsers () {
       try {
-        const res = await api.get('/user/all')
-        if (res.data) {
-          this.users = res.data
-        } else {
-          Notify.create({
-            message: 'Failed to get users',
-            type: 'negative',
-            position: 'top',
-            timeout: 2000,
-            classes: ['bg-negative text-white']
-          })
-        }
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        this.users = userData.map(user => ({
+          ...user,
+          role: 'Admin' // Default role for demo
+        }))
+        
+        return this.users
       } catch (error) {
         Notify.create({
           message: 'Failed to get users',
@@ -188,6 +189,7 @@ export const useUserStore = defineStore('users', {
         })
       }
     },
+
     async updateRole (UserId, RoleId) {
       if (!UserId || !RoleId) {
         Notify.create({
@@ -199,12 +201,23 @@ export const useUserStore = defineStore('users', {
         })
         return null
       }
+      
       try {
-        const res = await api.post('/user/role/update', {
-          UserId,
-          RoleId
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const userIndex = userData.findIndex(u => u.id === UserId)
+        if (userIndex !== -1) {
+          userData[userIndex].role = RoleId
+          userData[userIndex].updated_at = new Date()
+        }
+        
+        Notify.create({
+          message: 'User role updated successfully (Demo Mode)',
+          type: 'positive'
         })
-        return res
+        
+        return { status: 200, data: userData[userIndex] }
       } catch (error) {
         Notify.create({
           message: 'updateRole: error updating user role',
@@ -217,6 +230,7 @@ export const useUserStore = defineStore('users', {
         return null
       }
     },
+
     async updateUser (id, column, value) {
       if (!id || !column || value === undefined || value === null) {
         Notify.create({
@@ -228,9 +242,23 @@ export const useUserStore = defineStore('users', {
         })
         return null
       }
+      
       try {
-        const res = await api.post('/user/update', { id, column, value })
-        return res
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const userIndex = userData.findIndex(u => u.id === id)
+        if (userIndex !== -1) {
+          userData[userIndex][column] = value
+          userData[userIndex].updated_at = new Date()
+        }
+        
+        Notify.create({
+          message: 'User updated successfully (Demo Mode)',
+          type: 'positive'
+        })
+        
+        return { status: 200, data: userData[userIndex] }
       } catch (error) {
         Notify.create({
           message: 'updateUser: error updating user',
@@ -243,6 +271,7 @@ export const useUserStore = defineStore('users', {
         return null
       }
     },
+
     async deleteUser (id) {
       if (!id) {
         Notify.create({
@@ -254,9 +283,22 @@ export const useUserStore = defineStore('users', {
         })
         return null
       }
+      
       try {
-        const res = await api.delete(`/user/${id}`)
-        return res
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const userIndex = userData.findIndex(u => u.id === id)
+        if (userIndex !== -1) {
+          userData.splice(userIndex, 1)
+        }
+        
+        Notify.create({
+          message: 'User deleted successfully (Demo Mode)',
+          type: 'positive'
+        })
+        
+        return { status: 200 }
       } catch (error) {
         Notify.create({
           message: 'deleteUser: error deleting user',

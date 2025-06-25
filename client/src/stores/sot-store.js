@@ -3,6 +3,18 @@ import { api } from 'src/boot/axios'
 import { ref } from 'vue'
 import ls from 'localstorage-slim'
 import { Notify } from 'quasar'
+import { 
+  sotData, 
+  sotParticipantFindingsData, 
+  clsrData, 
+  locationData,
+  findLocationById,
+  findClsrById,
+  getSotsByLocation,
+  getFindingsBySot,
+  getSafeFindings,
+  getUnsafeFindings
+} from 'src/data'
 
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -51,43 +63,100 @@ export const useSotStore = defineStore('Sot', {
   }),
 
   actions: {
+    // DEMO MODE - Using dummy data instead of API calls
     async getSotFindingsById (params) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
       const page = params?.page || 1
       const limit = params?.limit || 10
-      const ParticipantId = ls.get('user')?.id // Fix: menggunakan 'id' bukan 'userData.Id'
+      const ParticipantId = ls.get('user')?.id
       
       if (!ParticipantId) {
         console.error('User ID not found in localStorage')
         throw new Error('User not logged in')
       }
       
-      const res = await api.get(
-        '/sot/finding/' + ParticipantId + '/?page=' + page + '&limit=' + limit
+      // Filter findings by participant
+      const userFindings = sotParticipantFindingsData.filter(finding => 
+        finding.CreatedBy === ParticipantId
       )
-      this.sotFindingList = res.data.data
-      this.sotFindingListMeta = res.data.meta
-      return res.data.data
+      
+      // Add enriched data
+      const enrichedFindings = userFindings.map(finding => {
+        const clsr = findClsrById(finding.ZRef_ClsrId)
+        return {
+          ...finding,
+          CLSR: clsr,
+          StatusText: finding.IsSafe ? 'SAFE' : 'UNSAFE'
+        }
+      })
+      
+      // Pagination
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedData = enrichedFindings.slice(startIndex, endIndex)
+      
+      this.sotFindingList = paginatedData
+      this.sotFindingListMeta = {
+        current_page: page,
+        per_page: limit,
+        total: enrichedFindings.length,
+        last_page: Math.ceil(enrichedFindings.length / limit)
+      }
+      
+      return paginatedData
     },
+
     async getSotFindings (params) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
       const page = params?.page || 1
       const limit = params?.limit || 10
-      const res = await api.get(
-        '/sot/finding/all/?page=' + page + '&limit=' + limit
-      )
-      this.sotFindingList = res.data.data
-      this.sotFindingListMeta = res.data.meta
-      return res.data.data
+      
+      // Add enriched data
+      const enrichedFindings = sotParticipantFindingsData.map(finding => {
+        const clsr = findClsrById(finding.ZRef_ClsrId)
+        return {
+          ...finding,
+          CLSR: clsr,
+          StatusText: finding.IsSafe ? 'SAFE' : 'UNSAFE'
+        }
+      })
+      
+      // Pagination
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedData = enrichedFindings.slice(startIndex, endIndex)
+      
+      this.sotFindingList = paginatedData
+      this.sotFindingListMeta = {
+        current_page: page,
+        per_page: limit,
+        total: enrichedFindings.length,
+        last_page: Math.ceil(enrichedFindings.length / limit)
+      }
+      
+      return paginatedData
     },
+
     async getClsrList () {
-      const { data } = await api.get('/sot/clsr/all')
-      console.log('🚀 ~ getClsr ~ data:', data)
-      return data
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      console.log('🚀 ~ getClsr ~ data:', clsrData)
+      return clsrData
     },
 
     async addSotFinding () {
       try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
         const CreatedDate = new Date()
-        const ParticipantId = ls.get('user')?.id // Fix: menggunakan 'id' bukan 'userData.Id'
+        const ParticipantId = ls.get('user')?.id
+        
         if (!ParticipantId) {
           Notify.create({
             type: 'negative',
@@ -95,80 +164,65 @@ export const useSotStore = defineStore('Sot', {
           })
           return
         }
-        // Fix: menggunakan email untuk ImageFileName karena tidak ada sAMAccountName
+
         const user = ls.get('user')
-        const ImageFileName = user.email?.split('@')[0] + '_' + CreatedDate.getTime()
+        const ImageFileName = user.email?.split('@')[0] + '_' + CreatedDate.getTime() + '.jpg'
 
-        const chunkSize = 10 * 1024 * 1024 // 10MB
-        const imageData = atob(this.ImageData.split(',')[1])
-        const arrayBuffer = new ArrayBuffer(imageData.length)
-        const uintArray = new Uint8Array(arrayBuffer)
-
-        for (let i = 0; i < imageData.length; i++) {
-          uintArray[i] = imageData.charCodeAt(i)
+        // Create new finding
+        const newFinding = {
+          Id: Math.max(...sotParticipantFindingsData.map(f => f.Id)) + 1,
+          SotParticipantId: 1, // Default for demo
+          CreatedBy: ParticipantId,
+          CreatedDate: CreatedDate,
+          IsSafe: this.IsSafe,
+          ImageFileName: ImageFileName,
+          Description: this.Description,
+          ZRef_ClsrId: this.ClsrId,
+          created_at: new Date(),
+          updated_at: new Date()
         }
 
-        const blob = new Blob([uintArray], { type: 'image/png' })
-        const fileSize = blob.size
-        const totalChunks = Math.ceil(fileSize / chunkSize)
+        // Add to dummy data
+        sotParticipantFindingsData.push(newFinding)
 
-        for (let i = 0; i < totalChunks; i++) {
-          const start = i * chunkSize
-          const end = Math.min(start + chunkSize, fileSize)
-          const chunk = blob.slice(start, end)
-
-          const formData = new FormData()
-          formData.append('ImageData', chunk)
-          formData.append('ImageFileName', ImageFileName)
-          formData.append('CreatedBy', ParticipantId)
-          formData.append('IsSafe', this.IsSafe)
-          formData.append('Description', this.Description)
-          formData.append('ZRef_ClsrId', this.ClsrId)
-          formData.append('CreatedDate', CreatedDate.toISOString())
-
-          formData.append('chunkIndex', i)
-          formData.append('totalChunks', totalChunks)
-
-          const res = await api.post('/sot/finding/add', formData)
-          if (res.status === 200 && res.data.isGroupMember === false) {
-            Notify.create({
-              type: 'negative',
-              textColor: 'black',
-              color: 'red',
-              message: 'You are not a member of any group'
-            })
-            return
-          }
-
-          if (res.status !== 200) {
-            Notify.create({
-              type: 'negative',
-              message:
-                'Error occurred while uploading chunk ' +
-                (i + 1) +
-                ' of ' +
-                totalChunks
-            })
-            return
-          }
-        }
+        // Reset form
+        this.ImageFileName = ''
+        this.ImageData = ''
+        this.Description = ''
+        this.IsSafe = null
+        this.ClsrId = ''
 
         Notify.create({
           type: 'positive',
           textColor: 'black',
           message: 'SOT finding added successfully'
         })
+
+        return newFinding
       } catch (error) {
         Notify.create({
           type: 'negative',
           message: 'Error occurred while adding SOT finding'
         })
+        console.error('Error adding SOT finding:', error)
       }
     },
 
     async getSotGroupList () {
-      const res = await api.get('/sot/group/all')
-      this.sotGroupList = [...res.data.data]
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Enrich SOT data with location information
+      const enrichedSots = sotData.map(sot => {
+        const location = findLocationById(sot.ZRef_LocationId)
+        return {
+          ...sot,
+          Location: location
+        }
+      })
+      
+      this.sotGroupList = enrichedSots
+      return enrichedSots
     },
 
     async getSotGroupById (Id) {
@@ -181,14 +235,31 @@ export const useSotStore = defineStore('Sot', {
       }
 
       try {
-        const { data } = await api.get(`/sot/group/${Id}`)
-        if (!data || !data.data) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const sot = sotData.find(s => s.Id === parseInt(Id))
+        if (!sot) {
           Notify.create({
             type: 'negative',
-            message: 'No Data'
+            message: 'SOT not found'
           })
+          return null
         }
-        return data.data
+
+        const location = findLocationById(sot.ZRef_LocationId)
+        const findings = getFindingsBySot(sot.Id)
+        
+        const enrichedSot = {
+          ...sot,
+          Location: location,
+          Findings: findings.map(finding => ({
+            ...finding,
+            CLSR: findClsrById(finding.ZRef_ClsrId)
+          }))
+        }
+
+        return enrichedSot
       } catch (error) {
         Notify.create({
           type: 'negative',
@@ -198,22 +269,65 @@ export const useSotStore = defineStore('Sot', {
         return null
       }
     },
+
     async addSotGroup (data) {
-      const res = await api.post('/sot/group/add', data)
-      if (res.statusText === 'OK') {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const newSot = {
+        Id: Math.max(...sotData.map(s => s.Id)) + 1,
+        ...data.attendant,
+        created_at: new Date(),
+        updated_at: new Date()
+      }
+
+      sotData.push(newSot)
+
+      Notify.create({
+        type: 'positive',
+        textColor: 'black',
+        message: 'SOT group added successfully'
+      })
+
+      return newSot
+    },
+
+    async updateSotGroup (id, data) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const index = sotData.findIndex(s => s.Id === parseInt(id))
+      if (index !== -1) {
+        sotData[index] = {
+          ...sotData[index],
+          ...data,
+          updated_at: new Date()
+        }
+        
         Notify.create({
           type: 'positive',
-          textColor: 'black',
-          message: 'SOT group added successfully'
+          message: 'SOT group updated successfully'
         })
       }
+      
+      return sotData[index]
     },
-    async updateSotGroup (id, data) {
-      const res = await api.put(`/sot/group/update/${id}`, data)
-      console.log('🚀 ~ updateSotGroup ~ res:', res)
-    },
+
     async deleteSotGroup (id) {
-      const res = await api.delete('/sot/group/delete/' + id)
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const index = sotData.findIndex(s => s.Id === parseInt(id))
+      if (index !== -1) {
+        sotData.splice(index, 1)
+        
+        Notify.create({
+          type: 'positive',
+          message: 'SOT group deleted successfully'
+        })
+      }
+      
+      return { success: true }
     }
   }
 })
