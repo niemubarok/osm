@@ -15,7 +15,7 @@
 
     <div>
 
-      <div>
+      <!-- <div>
         <q-img @click="imageViewerModel = true" src="~/assets/images/clsr.png" fit="contain" :ratio="16 / 9"
           spinner-color="primary" spinner-size="82px" />
       </div>
@@ -32,7 +32,7 @@
           <q-img src="~/assets/images/clsr.png" fit="contain" spinner-color=" primary" spinner-size="82px" />
         </q-card>
 
-      </q-dialog>
+      </q-dialog> -->
 
     </div>
 
