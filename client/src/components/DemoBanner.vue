@@ -8,9 +8,19 @@
     <div class="row items-center">
       <q-icon name="info" class="q-mr-sm" />
       <div class="text-weight-medium">
-        Demo Mode Active
+        Demo Mode - {{ isLoginPage ? 'Test Credentials Available' : 'Demo Mode Active' }}
       </div>
       <q-space />
+      <q-btn 
+        v-if="isLoginPage"
+        flat 
+        dense 
+        no-caps
+        color="amber-8"
+        @click="showCredentials = true"
+        class="q-mr-sm"
+        label="Show Logins"
+      />
       <q-btn 
         flat 
         dense 
@@ -19,7 +29,7 @@
         class="text-amber-8"
       />
     </div>
-    <div class="text-caption q-mt-xs">
+    <div v-if="!isLoginPage" class="text-caption q-mt-xs">
       Aplikasi sedang berjalan dalam mode demo dengan data dummy. 
       <q-btn 
         flat 
@@ -65,15 +75,29 @@
             </q-item-section>
             
             <q-item-section side>
-              <q-btn 
-                flat 
-                dense 
-                icon="content_copy"
-                @click="copyCredentials(user)"
-                color="primary"
-              >
-                <q-tooltip>Copy credentials</q-tooltip>
-              </q-btn>
+              <div class="row q-gutter-xs">
+                <q-btn 
+                  flat 
+                  dense 
+                  icon="content_copy"
+                  @click="copyCredentials(user)"
+                  color="primary"
+                  size="sm"
+                >
+                  <q-tooltip>Copy credentials</q-tooltip>
+                </q-btn>
+                <q-btn 
+                  v-if="isLoginPage"
+                  flat 
+                  dense 
+                  icon="login"
+                  @click="quickLogin(user)"
+                  color="green"
+                  size="sm"
+                >
+                  <q-tooltip>Quick login</q-tooltip>
+                </q-btn>
+              </div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -105,12 +129,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRoute } from 'vue-router'
+import { useUserStore } from 'src/stores/user-store'
 
 const $q = useQuasar()
+const route = useRoute()
+const userStore = useUserStore()
+
 const showBanner = ref(true)
 const showCredentials = ref(false)
+
+// Check if current page is login page
+const isLoginPage = computed(() => {
+  return route.name === 'login' || route.path === '/login'
+})
 
 const demoUsers = [
   {
@@ -154,6 +188,23 @@ const copyCredentials = (user) => {
       position: 'top'
     })
   })
+}
+
+const quickLogin = (user) => {
+  if (isLoginPage.value) {
+    // Set credentials in user store
+    userStore.username = user.email
+    userStore.password = user.password
+    
+    // Close dialog
+    showCredentials.value = false
+    
+    $q.notify({
+      message: `Credentials filled for ${user.role}`,
+      type: 'info',
+      position: 'top'
+    })
+  }
 }
 
 onMounted(() => {

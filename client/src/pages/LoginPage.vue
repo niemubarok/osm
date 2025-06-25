@@ -1,5 +1,8 @@
 <template>
   <q-page padding>
+    <!-- Demo Banner -->
+    <DemoBanner />
+    
     <q-card :flat="$q.screen.lt.sm" class="absolute-center q-pa-lg flex justify-center" :style="{
       width: $q.screen.lt.sm ? '100%' : 'fit-content',
     }">
@@ -73,6 +76,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useUserStore } from 'src/stores/user-store'
+import DemoBanner from 'src/components/DemoBanner.vue'
 import ls from 'localstorage-slim'
 
 const $q = useQuasar()
