@@ -1,8 +1,8 @@
 {
   "name": "osm",
   "version": "0.0.1",
-  "description": "Onsite Meeting SBI",
-  "productName": "OSM APP",
+  "description": "Online Safety System",
+  "productName": "OSS",
   "author": "husni mubarok",
   "type": "module",
   "private": true,

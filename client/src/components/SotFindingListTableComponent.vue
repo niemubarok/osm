@@ -93,7 +93,7 @@
           </q-td>
         </template>
         <q-td>
-          {{ props?.row?.CreatedDate.substring(0, 10) }}
+          {{ props?.row?.CreatedDate ? String(props?.row?.CreatedDate).substring(0, 10) : '-' }}
         </q-td>
 
         <!-- </template> -->

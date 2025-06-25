@@ -8,18 +8,19 @@
     }">
       <div>
         <!-- LOGO -->
-        <div class="flex row justify-between items-end q-mb-xl">
+        <!-- <div class="flex row justify-between items-end q-mb-xl">
           <q-img fit="cover" src="~assets/logo/sig.svg" spinner-color="primary" spinner-size="82px" width="10%" />
           <q-img fit="cover" src="~assets/logo/logo_sbi.svg" spinner-color="primary" spinner-size="82px" width="40%" />
-        </div>
+        </div> -->
 
         <!-- TITLE -->
         <div class="text-center text-h6 q-mb-md">
-          <span class="text-dark text-weight-bolder">Onsite Meeting (OSM)</span>
+          <span class="text-dark text-weight-bolder">Online Safety System (OSS)</span>
         </div>
         <div style="font-size: clamp(10px, 2.5vw, 12px)" class="text-grey-10 text-center">
           Please use your email and password to login
-        </div>        <div class="q-mt-md">
+        </div>
+        <div class="q-mt-md">
           <form @submit.prevent="handleLogin">
             <q-input
               v-model="userStore.username"

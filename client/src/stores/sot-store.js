@@ -99,10 +99,12 @@ export const useSotStore = defineStore('Sot', {
       
       this.sotFindingList = paginatedData
       this.sotFindingListMeta = {
-        current_page: page,
-        per_page: limit,
-        total: enrichedFindings.length,
-        last_page: Math.ceil(enrichedFindings.length / limit)
+        meta: {
+          current_page: page,
+          per_page: limit,
+          total: enrichedFindings.length,
+          last_page: Math.ceil(enrichedFindings.length / limit)
+        }
       }
       
       return paginatedData
@@ -132,10 +134,12 @@ export const useSotStore = defineStore('Sot', {
       
       this.sotFindingList = paginatedData
       this.sotFindingListMeta = {
-        current_page: page,
-        per_page: limit,
-        total: enrichedFindings.length,
-        last_page: Math.ceil(enrichedFindings.length / limit)
+        meta: {
+          current_page: page,
+          per_page: limit,
+          total: enrichedFindings.length,
+          last_page: Math.ceil(enrichedFindings.length / limit)
+        }
       }
       
       return paginatedData

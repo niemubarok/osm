@@ -12,11 +12,9 @@
 
         <q-toolbar-title class="flex justify-between text-dark text-h4 text-bold">
           <!-- {{ componentStore.isShowSearchBox }} -->
-          <q-slide-transition>
-            <div v-if="!componentStore.isShowSearchBox">
-              <LogoSBI width="100px" />
-            </div>
-          </q-slide-transition>
+          <div  class="text-h6 text-weight-bolder">
+            {{ $route.meta.title }}
+          </div>
           <q-space />
           <q-slide-transition>
             <div v-show="componentStore.isShowSearchBox || !$q.screen.lt.md"
